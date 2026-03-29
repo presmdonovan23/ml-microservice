@@ -5,6 +5,7 @@ Downloads handwritten digits dataset and trains a classifier
 from ucimlrepo import fetch_ucirepo
 import xgboost as xgb
 import numpy as np
+import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.preprocessing import StandardScaler
@@ -47,7 +48,7 @@ def preprocess_data(X, y):
     X_val_scaled = scaler.transform(X_val)
     X_test_scaled = scaler.transform(X_test)
 
-    return X_train_scaled, X_val_scaled, X_test_scaled, y_train, y_val, y_test
+    return X_train_scaled, X_val_scaled, X_test_scaled, y_train, y_val, y_test, scaler
 
 
 def train_model(X_train, X_val, y_train, y_val):
@@ -106,7 +107,7 @@ def evaluate_model(model, X_test, y_test):
     return accuracy
 
 
-def save_model(model, filepath="model.json"):
+def save_model(model, filepath="artifacts/model.json"):
     """Save trained model to JSON file"""
     model.save_model(filepath)
     print(f"\nModel saved to {filepath}")
@@ -118,7 +119,7 @@ def main():
     X, y = load_data()
 
     # Preprocess and split
-    X_train, X_val, X_test, y_train, y_val, y_test = preprocess_data(X, y)
+    X_train, X_val, X_test, y_train, y_val, y_test, scaler = preprocess_data(X, y)
 
     # Train model
     model = train_model(X_train, X_val, y_train, y_val)
@@ -128,6 +129,8 @@ def main():
 
     # Save model
     save_model(model)
+    joblib.dump(scaler, "artifacts/scaler.pkl")
+    print("\nScaler saved to artifacts/scaler.pkl")
 
 
 if __name__ == "__main__":
